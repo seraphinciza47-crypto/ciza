@@ -402,14 +402,58 @@ footer {
       <button>Voir plus</button>
     </div>
   </div>
+<div>
 
-<
+<button onclick="
+var img=document.getElementById('img');
+var dl=document.getElementById('dl');
+
+if(img.style.display==='none'){
+  img.style.display='block';
+  dl.style.display='inline-block';
+}else{
+  img.style.display='none';
+  dl.style.display='none';
+}
+"
+style="
+padding:12px 25px;
+font-size:16px;
+border:none;
+border-radius:8px;
+background:#007BFF;
+color:white;
+cursor:pointer;
+box-shadow:0 4px 8px rgba(0,0,0,0.2);
+">
+  Voir le certificat
+</button>
+
+<br><br>
+
+<img id="img" src="Cert.jpg" style="display:none; width:300px; border-radius:10px; border:2px solid black;">
+
+<br><br>
+
+<a id="dl" href="Cert.jpg" download style="
+display:none;
+padding:10px 20px;
+background:green;
+color:white;
+text-decoration:none;
+border-radius:6px;
+">
+  Télécharger le certificat
+</a>
+
+</div>
+
 </section>
 
 <!-- CONTACT -->
 <section id="contact" class="section contact">
   <h2>Contactez-moi</h2>
-<form> action="mailto:seraphinciza47@gmail.com" method="post" enctype="text/plain">
+<form>
     <input type="text" name="Nom" placeholder="Votre nom" required>
     <input type="email" name="Email" placeholder="Votre email" required>
     <input type="tel" name="Téléphone" placeholder="Numéro de téléphone">
@@ -424,21 +468,12 @@ footer {
 </div>
 
 
-<button onclick="
-var img = document.getElementById('img');
-img.style.display = (img.style.display === 'none') ? 'block' : 'none';
-">
-  Voir le certificat
-</button>
 
-<br><br>
-
-<img id="img" src="Cert.jpg" style="display:none; width:300px; border:2px solid black;">
  
 
 
 <footer>
-  <p>© 2026 Ciza Balola Séraphin dit cbs</p>
+  <p>© 2026 Ciza Balola Séraphin dit cbs +243 902553512</p>
 </footer>
 
 <script>
