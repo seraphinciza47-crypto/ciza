@@ -403,27 +403,13 @@ footer {
     </div>
   </div>
 
-<button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalCertificat">
-  <i class="bi bi-eye"></i> Voir le certificat
-</button>
-
-<div class="modal fade" id="modalCertificat" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Mon Certificat</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img src="Cert.jpg
-
+<
 </section>
 
 <!-- CONTACT -->
 <section id="contact" class="section contact">
   <h2>Contactez-moi</h2>
-
-  <form action="mailto:seraphinciza47@gmail.com" method="post" enctype="text/plain">
+<form> action="mailto:seraphinciza47@gmail.com" method="post" enctype="text/plain">
     <input type="text" name="Nom" placeholder="Votre nom" required>
     <input type="email" name="Email" placeholder="Votre email" required>
     <input type="tel" name="Téléphone" placeholder="Numéro de téléphone">
@@ -436,6 +422,18 @@ footer {
                   <i class="bi bi-apple"></i>
                   
 </div>
+
+
+<button onclick="
+var img = document.getElementById('img');
+img.style.display = (img.style.display === 'none') ? 'block' : 'none';
+">
+  Voir le certificat
+</button>
+
+<br><br>
+
+<img id="img" src="Cert.jpg" style="display:none; width:300px; border:2px solid black;">
  
 
 
