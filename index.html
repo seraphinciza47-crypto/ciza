@@ -466,6 +466,15 @@ border-radius:6px;
                   <i class="bi bi-apple"></i>
                   
 </div>
+<section class="section" style="background:#f1f5f9">
+  <div style="text-align:center; margin-bottom:20px;">
+     <button onclick="likerPortfolio()" style="background:#ef4444; color:white; border:none; padding:10px 20px; border-radius:20px; cursor:pointer;">
+       ❤️ J'aime (<span id="countLike">0</span>)
+     </button>
+  </div>
+  <h2 style="text-align:center">Avis récents</h2>
+  <div id="liste-commentaires" style="max-width:500px; margin:auto; padding:10px;"></div>
+</section>
 
 
 
@@ -476,25 +485,104 @@ border-radius:6px;
   <p>© 2026 Ciza Balola Séraphin dit cbs +243 902553512 </p>
 </footer>
 
-<script>
-  
-function toggleMenu() {
-  const nav = document.getElementById("nav");
-  nav.style.display = nav.style.display === "flex" ? "none" : "flex";
-}
+<script type="module">
+  // 1. Importation des outils Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, increment, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
-/* Animation typing (fonctions) */
-const text = "Développeur Web & Mobile | Enseignant en Informatique";
-let i = 0;
-function typingEffect() {
-  if (i < text.length) {
-    document.getElementById("typing").innerHTML += text.charAt(i);
-    i++;
-    setTimeout(typingEffect, 100);
+  // 2. TA CONFIGURATION (Remplace par tes vraies clés de la console Firebase)
+  const firebaseConfig = {
+    apiKey: "TON_API_KEY",
+    authDomain: "mon-portofolio-796b2.firebaseapp.com",
+    projectId: "mon-portofolio-796b2",
+    storageBucket: "mon-portofolio-796b2.appspot.com",
+    messagingSenderId: "TON_ID",
+    appId: "TON_APP_ID"
+  };
+
+  // Initialisation de Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // --- LOGIQUE EXISTANTE (MENU & TYPING) ---
+  window.toggleMenu = function() {
+    const nav = document.getElementById("nav");
+    nav.style.display = nav.style.display === "flex" ? "none" : "flex";
+  };
+
+  const text = "Développeur Web & Mobile | Enseignant en Informatique";
+  let i = 0;
+  function typingEffect() {
+    if (i < text.length) {
+      document.getElementById("typing").innerHTML += text.charAt(i);
+      i++;
+      setTimeout(typingEffect, 100);
+    }
   }
-}
-typingEffect();
+  typingEffect();
 
+  // --- NOUVELLE LOGIQUE : ENVOYER COMMENTAIRE ---
+  const contactForm = document.querySelector('.contact form');
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    const data = {
+      nom: e.target.Nom.value,
+      email: e.target.Email.value,
+      message: e.target.Message.value,
+      date: serverTimestamp()
+    };
+
+    btn.disabled = true;
+    btn.innerText = "Envoi en cours...";
+
+    try {
+      await addDoc(collection(db, "commentaires"), data);
+      alert("Merci ! Ton message a été enregistré dans Firebase.");
+      e.target.reset();
+      chargerCommentaires(); // Rafraîchir la liste
+    } catch (err) {
+      alert("Erreur de connexion à la base de données.");
+    }
+    btn.disabled = false;
+    btn.innerText = "Envoyer";
+  });
+
+  // --- NOUVELLE LOGIQUE : AFFICHER COMMENTAIRES ---
+  async function chargerCommentaires() {
+    const div = document.getElementById('liste-commentaires');
+    if(!div) return;
+    const q = query(collection(db, "commentaires"), orderBy("date", "desc"));
+    const snap = await getDocs(q);
+    
+    div.innerHTML = "";
+    snap.forEach(d => {
+      const item = d.data();
+      div.innerHTML += `
+        <div style="background:white; padding:15px; border-radius:12px; margin-bottom:10px; border-left:5px solid #2563eb; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+          <strong style="color:#0f172a;">${item.nom}</strong>
+          <p style="margin-top:5px; color:#64748b; font-size:0.9em;">${item.message}</p>
+        </div>`;
+    });
+  }
+
+  // --- LOGIQUE DES LIKES ---
+  window.likerPortfolio = async () => {
+    const likeDoc = doc(db, "stats", "likes");
+    await setDoc(likeDoc, { count: increment(1) }, { merge: true });
+    actualiserLikes();
+  };
+
+  async function actualiserLikes() {
+    const snap = await getDoc(doc(db, "stats", "likes"));
+    if (snap.exists()) document.getElementById('countLike').innerText = snap.data().count;
+  }
+
+  // Lancement au démarrage
+  chargerCommentaires();
+  actualiserLikes();
 </script>
+
+
 </body>
 </html>
