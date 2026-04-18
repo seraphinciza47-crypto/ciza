@@ -475,10 +475,8 @@ border-radius:6px;
       <input type="email" id="authEmail" placeholder="Email" style="width:100%; margin-bottom:10px; padding:10px;">
       <input type="password" id="authPassword" placeholder="Mot de passe" style="width:100%; margin-bottom:10px; padding:10px;">
       <input type="tel" id="authWhatsapp" placeholder="WhatsApp (Obligatoire : +243...)" style="width:100%; margin-bottom:10px; padding:10px;">
-      <p style="font-size: 0.8em; color: gray;">Photo de profil (Obligatoire pour l'album) :</p>
-<input type="file" id="authphoto" accept="image/*" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:8px;">
-
-     
+      <p style="font-size: 0.8em; color: gray;">Photo de profil (URL optionnelle) :</p>
+      <input type="text" id="authPhoto" placeholder="Lien vers votre photo" style="width:100%; margin-bottom:10px; padding:10px;">
       <button onclick="gererAuthentification()" id="btnAuth" style="width:100%; background:#2563eb; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer;">S'inscrire</button>
       <p style="text-align:center; margin-top:10px; font-size:0.9em;">
         Déjà un compte ? <a href="javascript:void(0)" onclick="basculerAuth()">Se connecter</a>
