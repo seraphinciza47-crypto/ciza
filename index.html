@@ -465,15 +465,45 @@ border-radius:6px;
 
                   <i class="bi bi-apple"></i>
                   
-</div>
-<section class="section" style="background:#f1f5f9">
-  <div style="text-align:center; margin-bottom:20px;">
-     <button onclick="likerPortfolio()" style="background:#ef4444; color:white; border:none; padding:10px 20px; border-radius:20px; cursor:pointer;">
-       ❤️ J'aime (<span id="countLike">0</span>)
-     </button>
+
+<section id="communaute" class="section" style="background:#f1f5f9; border-top: 2px solid #e2e8f0;">
+  <h2 style="text-align:center">Espace Étudiants</h2>
+  
+  <div id="auth-container" style="max-width:500px; margin:auto; background:white; padding:20px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
+    <div id="auth-form">
+      <h3 id="auth-title">Créer un compte</h3>
+      <input type="email" id="authEmail" placeholder="Email" style="width:100%; margin-bottom:10px; padding:10px;">
+      <input type="password" id="authPassword" placeholder="Mot de passe" style="width:100%; margin-bottom:10px; padding:10px;">
+      <input type="tel" id="authWhatsapp" placeholder="WhatsApp (Obligatoire : +243...)" style="width:100%; margin-bottom:10px; padding:10px;">
+      <p style="font-size: 0.8em; color: gray;">Photo de profil (URL optionnelle) :</p>
+      <input type="text" id="authPhoto" placeholder="Lien vers votre photo" style="width:100%; margin-bottom:10px; padding:10px;">
+      <button onclick="gererAuthentification()" id="btnAuth" style="width:100%; background:#2563eb; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer;">S'inscrire</button>
+      <p style="text-align:center; margin-top:10px; font-size:0.9em;">
+        Déjà un compte ? <a href="javascript:void(0)" onclick="basculerAuth()">Se connecter</a>
+      </p>
+    </div>
+    
+    <div id="user-profile" style="display:none; text-align:center;">
+      <img id="userImg" src="" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid #2563eb;">
+      <p id="userWelcome" style="font-weight:bold; margin:10px 0;"></p>
+      <button onclick="deconnexion()" style="background:none; border:none; color:red; cursor:pointer; text-decoration:underline;">Se déconnecter</button>
+    </div>
   </div>
-  <h2 style="text-align:center">Avis récents</h2>
-  <div id="liste-commentaires" style="max-width:500px; margin:auto; padding:10px;"></div>
+
+  <div id="interaction-container" style="display:none; margin-top:30px;">
+    <div style="text-align:center; margin-bottom:30px;">
+       <button id="btnLike" onclick="likerPortfolio()" style="background:#ef4444; color:white; border:none; padding:15px 30px; border-radius:30px; cursor:pointer; font-weight:bold;">
+         ❤️ <span id="likeStatus">J'aime</span> (<span id="countLike">0</span>)
+       </button>
+    </div>
+
+    <div style="max-width:500px; margin:auto; background:white; padding:20px; border-radius:15px;">
+      <textarea id="commTexte" placeholder="Votre commentaire..." style="width:100%; height:80px; margin-bottom:10px; padding:10px; border-radius:8px; border:1px solid #ddd;"></textarea>
+      <button onclick="ajouterCommentaire()" style="width:100%; background:#22c55e; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">Publier mon commentaire</button>
+    </div>
+  </div>
+
+  <div id="liste-commentaires" style="max-width:500px; margin:30px auto; padding:0 10px;"></div>
 </section>
 
 
@@ -486,102 +516,154 @@ border-radius:6px;
 </footer>
 
 <script type="module">
-  // 1. Importation des outils Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, increment, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, addDoc, collection, query, orderBy, getDocs, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
-  // 2. TA CONFIGURATION (Remplace par tes vraies clés de la console Firebase)
+  // Ta configuration Firebase
   const firebaseConfig = {
-    apiKey: "TON_API_KEY",
+    apiKey: "AIzaSyBEyZF2rsi7E35XyZe63MDyJ0Sn-cpV9nw",
     authDomain: "mon-portofolio-796b2.firebaseapp.com",
     projectId: "mon-portofolio-796b2",
-    storageBucket: "mon-portofolio-796b2.appspot.com",
-    messagingSenderId: "TON_ID",
-    appId: "TON_APP_ID"
+    storageBucket: "mon-portofolio-796b2.firebasestorage.app",
+    messagingSenderId: "195118909903",
+    appId: "1:195118909903:web:358b654c470cf6287f2aba"
   };
 
-  // Initialisation de Firebase
   const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // --- LOGIQUE EXISTANTE (MENU & TYPING) ---
-  window.toggleMenu = function() {
-    const nav = document.getElementById("nav");
-    nav.style.display = nav.style.display === "flex" ? "none" : "flex";
+  let estModeInscription = true;
+
+  // --- AUTHENTIFICATION ---
+  window.basculerAuth = () => {
+    estModeInscription = !estModeInscription;
+    document.getElementById('auth-title').innerText = estModeInscription ? "Créer un compte" : "Se connecter";
+    document.getElementById('btnAuth').innerText = estModeInscription ? "S'inscrire" : "Se connecter";
+    document.getElementById('authWhatsapp').style.display = estModeInscription ? "block" : "none";
+    document.getElementById('authPhoto').style.display = estModeInscription ? "block" : "none";
   };
 
-  const text = "Développeur Web & Mobile | Enseignant en Informatique";
-  let i = 0;
-  function typingEffect() {
-    if (i < text.length) {
-      document.getElementById("typing").innerHTML += text.charAt(i);
-      i++;
-      setTimeout(typingEffect, 100);
-    }
-  }
-  typingEffect();
-
-  // --- NOUVELLE LOGIQUE : ENVOYER COMMENTAIRE ---
-  const contactForm = document.querySelector('.contact form');
-  contactForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector('button');
-    const data = {
-      nom: e.target.Nom.value,
-      email: e.target.Email.value,
-      message: e.target.Message.value,
-      date: serverTimestamp()
-    };
-
-    btn.disabled = true;
-    btn.innerText = "Envoi en cours...";
+  window.gererAuthentification = async () => {
+    const email = document.getElementById('authEmail').value;
+    const pass = document.getElementById('authPassword').value;
+    const whatsapp = document.getElementById('authWhatsapp').value;
+    const photo = document.getElementById('authPhoto').value || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
     try {
-      await addDoc(collection(db, "commentaires"), data);
-      alert("Merci ! Ton message a été enregistré dans Firebase.");
-      e.target.reset();
-      chargerCommentaires(); // Rafraîchir la liste
-    } catch (err) {
-      alert("Erreur de connexion à la base de données.");
-    }
-    btn.disabled = false;
-    btn.innerText = "Envoyer";
-  });
-
-  // --- NOUVELLE LOGIQUE : AFFICHER COMMENTAIRES ---
-  async function chargerCommentaires() {
-    const div = document.getElementById('liste-commentaires');
-    if(!div) return;
-    const q = query(collection(db, "commentaires"), orderBy("date", "desc"));
-    const snap = await getDocs(q);
-    
-    div.innerHTML = "";
-    snap.forEach(d => {
-      const item = d.data();
-      div.innerHTML += `
-        <div style="background:white; padding:15px; border-radius:12px; margin-bottom:10px; border-left:5px solid #2563eb; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-          <strong style="color:#0f172a;">${item.nom}</strong>
-          <p style="margin-top:5px; color:#64748b; font-size:0.9em;">${item.message}</p>
-        </div>`;
-    });
-  }
-
-  // --- LOGIQUE DES LIKES ---
-  window.likerPortfolio = async () => {
-    const likeDoc = doc(db, "stats", "likes");
-    await setDoc(likeDoc, { count: increment(1) }, { merge: true });
-    actualiserLikes();
+      if (estModeInscription) {
+        if (!whatsapp) return alert("WhatsApp obligatoire !");
+        const res = await createUserWithEmailAndPassword(auth, email, pass);
+        // Sauvegarder les infos supplémentaires dans Firestore
+        await setDoc(doc(db, "utilisateurs", res.user.uid), {
+          whatsapp: whatsapp,
+          photo: photo,
+          hasLiked: false
+        });
+        await updateProfile(res.user, { photoURL: photo });
+      } else {
+        await signInWithEmailAndPassword(auth, email, pass);
+      }
+    } catch (e) { alert("Erreur: " + e.message); }
   };
 
-  async function actualiserLikes() {
+  window.deconnexion = () => signOut(auth);
+
+  // Surveiller l'état de connexion
+  onAuthStateChanged(auth, async (user) => {
+    const form = document.getElementById('auth-form');
+    const profile = document.getElementById('user-profile');
+    const interactions = document.getElementById('interaction-container');
+
+    if (user) {
+      form.style.display = "none";
+      profile.style.display = "block";
+      interactions.style.display = "block";
+      document.getElementById('userImg').src = user.photoURL;
+      document.getElementById('userWelcome').innerText = "Bienvenue, " + user.email;
+      verifierLike(user.uid);
+    } else {
+      form.style.display = "block";
+      profile.style.display = "none";
+      interactions.style.display = "none";
+    }
+    chargerCommentaires();
+    actualiserCompteurGlobal();
+  });
+
+  // --- LIKES (UNIQUE PAR UTILISATEUR) ---
+  async function verifierLike(uid) {
+    const userDoc = await getDoc(doc(db, "utilisateurs", uid));
+    if (userDoc.exists() && userDoc.data().hasLiked) {
+      document.getElementById('likeStatus').innerText = "Déjà aimé";
+      document.getElementById('btnLike').disabled = true;
+      document.getElementById('btnLike').style.opacity = "0.6";
+    }
+  }
+
+  window.likerPortfolio = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      // 1. Marquer l'utilisateur comme ayant aimé
+      await setDoc(doc(db, "utilisateurs", user.uid), { hasLiked: true }, { merge: true });
+      // 2. Incrémenter le compteur global
+      await setDoc(doc(db, "stats", "likes"), { count: increment(1) }, { merge: true });
+      
+      document.getElementById('likeStatus').innerText = "Merci !";
+      document.getElementById('btnLike').disabled = true;
+      actualiserCompteurGlobal();
+    } catch (e) { console.error(e); }
+  };
+
+  async function actualiserCompteurGlobal() {
     const snap = await getDoc(doc(db, "stats", "likes"));
     if (snap.exists()) document.getElementById('countLike').innerText = snap.data().count;
   }
 
-  // Lancement au démarrage
-  chargerCommentaires();
-  actualiserLikes();
+  // --- COMMENTAIRES (PLUSIEURS FOIS) ---
+  window.ajouterCommentaire = async () => {
+    const user = auth.currentUser;
+    const texte = document.getElementById('commTexte').value;
+    if (!texte) return;
+
+    await addDoc(collection(db, "commentaires"), {
+      auteur: user.email,
+      photo: user.photoURL,
+      message: texte,
+      date: serverTimestamp()
+    });
+    document.getElementById('commTexte').value = "";
+    chargerCommentaires();
+  };
+
+  async function chargerCommentaires() {
+    const div = document.getElementById('liste-commentaires');
+    const q = query(collection(db, "commentaires"), orderBy("date", "desc"));
+    const snap = await getDocs(q);
+    div.innerHTML = "";
+    snap.forEach(d => {
+      const c = d.data();
+      div.innerHTML += `
+        <div style="display:flex; gap:10px; background:white; padding:10px; border-radius:10px; margin-bottom:10px;">
+          <img src="${c.photo}" style="width:40px; height:40px; border-radius:50%;">
+          <div>
+            <strong style="font-size:0.8em;">${c.auteur}</strong>
+            <p style="font-size:0.9em;">${c.message}</p>
+          </div>
+        </div>`;
+    });
+  }
+
+  // Ton menu existant
+  window.toggleMenu = () => {
+    const nav = document.getElementById("nav");
+    nav.style.display = nav.style.display === "flex" ? "none" : "flex";
+  };
 </script>
+
 
 
 </body>
