@@ -663,6 +663,88 @@ border-radius:6px;
     nav.style.display = nav.style.display === "flex" ? "none" : "flex";
   };
 </script>
+<button id="theme-toggle" title="Changer de mode" style="position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; border: none; cursor: pointer; z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;">
+  🌙
+</button>
+
+<style>
+  /* 1. Variables de couleurs et mode sobre */
+  :root {
+    --bg-color: #f8f9fa;
+    --text-color: #212529;
+    --accent-color: #0d6efd;
+    --nav-bg: rgba(255, 255, 255, 0.8);
+  }
+
+  [data-theme="dark"] {
+    --bg-color: #0f172a; /* Bleu nuit très sombre pour un aspect pro */
+    --text-color: #f1f5f9;
+    --accent-color: #38bdf8;
+    --nav-bg: rgba(15, 23, 42, 0.8);
+  }
+
+  /* 2. Application globale */
+  html {
+    scroll-behavior: smooth; /* Défilement doux entre sections */
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.4s ease, color 0.4s ease;
+    margin: 0;
+  }
+
+  /* 3. Effet Glassmorphism (à appliquer sur votre classe .navbar si elle existe) */
+  .glass-effect {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-color: var(--nav-bg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Style du bouton toggle */
+  #theme-toggle {
+    background-color: var(--accent-color);
+    color: white;
+  }
+  
+  #theme-toggle:hover {
+    transform: scale(1.1);
+  }
+</style>
+
+<script>
+  const toggleButton = document.querySelector('#theme-toggle');
+  const htmlElement = document.documentElement;
+
+  // 1. Vérification du choix précédent (LocalStorage)
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    htmlElement.setAttribute('data-theme', savedTheme);
+    toggleButton.innerHTML = savedTheme === 'dark' ? '☀️' : '🌙';
+  }
+
+  // 2. Logique de basculement
+  toggleButton.addEventListener('click', () => {
+    const isDark = htmlElement.getAttribute('data-theme') === 'dark';
+    
+    if (isDark) {
+      htmlElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+      toggleButton.innerHTML = '🌙';
+    } else {
+      htmlElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      toggleButton.innerHTML = '☀️';
+    }
+  });
+
+  // Optionnel : Appliquer automatiquement la classe glass-effect à votre nav si elle existe
+  const nav = document.querySelector('nav');
+  if (nav) nav.classList.add('glass-effect');
+</script>
+
 
 
 
